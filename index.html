@@ -836,7 +836,21 @@ const db    = getFirestore(fbApp);
 const gProv = new GoogleAuthProvider();
 
 /* Handle redirect result on load (mobile PWA) */
-getRedirectResult(auth).catch(e=>{ if(e.code!=='auth/no-current-user') console.error(e); });
+/* Handle redirect result — fires when user returns from Google sign-in on mobile */
+getRedirectResult(auth).then(result=>{
+  if(result&&result.user){
+    /* Redirect succeeded — onAuthStateChanged will fire automatically */
+    showLoading('Signing in...');
+  }
+}).catch(e=>{
+  if(e.code==='auth/unauthorized-domain'){
+    hideLoading();
+    alert('Domain not authorized. Please add this URL to Firebase authorized domains.');
+  } else if(e.code&&e.code!=='auth/no-current-user'&&e.code!=='auth/null-user'){
+    console.error('Redirect result error:',e.code,e.message);
+    hideLoading();
+  }
+});
 
 /* ── CONSTANTS ── */
 const EMOJIS = ['🏃','💧','📚','🧘','🥗','💊','✍️','🎯','🛌','💪','🎨','🧹','🌿','☀️','🎵','🚴','🏊','🍎','🧠','🙏'];
@@ -1033,9 +1047,30 @@ function isMobile(){ return /Android|iPhone|iPad/i.test(navigator.userAgent); }
 window.signInWithGoogle=async function(){
   try{
     showLoading('Signing in...');
-    if(isPWA()||isMobile()) await signInWithRedirect(auth,gProv);
-    else await signInWithPopup(auth,gProv);
-  } catch(e){ hideLoading(); alert('Sign-in failed: '+e.message); }
+    if(isPWA()){
+      /* Installed PWA — must use redirect, popup is blocked */
+      await signInWithRedirect(auth,gProv);
+    } else {
+      /* Mobile browser and desktop — try popup first (faster, no page reload) */
+      try{
+        await signInWithPopup(auth,gProv);
+      } catch(popupErr){
+        if(popupErr.code==='auth/popup-blocked'||popupErr.code==='auth/popup-closed-by-user'||popupErr.code==='auth/cancelled-popup-request'){
+          /* Popup blocked (some mobile browsers block popups) — fall back to redirect */
+          await signInWithRedirect(auth,gProv);
+        } else {
+          throw popupErr;
+        }
+      }
+    }
+  } catch(e){
+    hideLoading();
+    if(e.code==='auth/unauthorized-domain'){
+      alert('Domain not authorized. Go to Firebase > Authentication > Settings > Authorized domains and add: '+location.hostname);
+    } else {
+      alert('Sign-in failed: '+e.message);
+    }
+  }
 };
 window.doSignOut=async function(){
   if(!confirm('Sign out of HabitTick?')) return;
@@ -1562,31 +1597,75 @@ function renderCalDetail(dk){
 
 /* ── WEEKLY GRADE ── */
 function changeWeek(d){ gradeWeekOffset+=d; if(gradeWeekOffset>0)gradeWeekOffset=0; renderGrade(); }
+function getWeekTotalTime(hid){
+  /* Sum of _time logged across all days in the current grade week */
+  /* For today, add live elapsed if timer is currently running */
+  const days=getWeekDays(gradeWeekOffset);
+  return days.reduce((sum,dk)=>{
+    const dl=logs[dk]||{};
+    let secs=dl[hid+'_time']||0;
+    /* If this is today and timer is actively running, add live unsaved time */
+    if(dk===todayKey && timers[hid] && timers[hid].running){
+      secs=getLiveElapsed(hid);
+    }
+    return sum+secs;
+  },0);
+}
+
 function renderGrade(){
   const days=getWeekDays(gradeWeekOffset);
   const mon=new Date(days[0]),sun=new Date(days[6]);
   const MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  document.getElementById('week-label').textContent=`${MONS[mon.getMonth()]} ${mon.getDate()} – ${MONS[sun.getMonth()]} ${sun.getDate()}`;
+  document.getElementById('week-label').textContent=MONS[mon.getMonth()]+' '+mon.getDate()+' – '+MONS[sun.getMonth()]+' '+sun.getDate();
   const pct=getWeekScore(gradeWeekOffset),g=getGrade(pct);
-  document.getElementById('big-grade-card').innerHTML=`
-    <div class="big-grade-card ${g.bgcls}">
-      <span class="big-grade-letter ${g.cls}" style="color:${g.color}">${g.g}</span>
-      <div class="big-grade-label">${g.label}</div>
-      <div class="big-grade-pct">${pct}% weekly completion · ${days.filter(dk=>habits.some(h=>isChecked(h.id,dk))).length}/7 active days</div>
-    </div>`;
+  /* Total timed work across whole week */
+  const weekTimedSecs=habits.filter(h=>h.habitType==='timed').reduce((s,h)=>s+getWeekTotalTime(h.id),0);
+  const weekTimedStr=weekTimedSecs>0?' · ⏱ '+fmtSecs(weekTimedSecs)+' total work':'';
+  document.getElementById('big-grade-card').innerHTML=
+    '<div class="big-grade-card '+g.bgcls+'">'
+    +'<span class="big-grade-letter '+g.cls+'" style="color:'+g.color+'">'+g.g+'</span>'
+    +'<div class="big-grade-label">'+g.label+'</div>'
+    +'<div class="big-grade-pct">'+pct+'% weekly completion · '+days.filter(dk=>habits.some(h=>isChecked(h.id,dk))).length+'/7 active days'+weekTimedStr+'</div>'
+    +'</div>';
   if(!habits.length){document.getElementById('habit-grade-list').innerHTML='';return;}
   const sorted=[...habits].map(h=>({h,pct:getHabitWeekScore(h.id,gradeWeekOffset)})).sort((a,b)=>b.pct-a.pct);
   document.getElementById('habit-grade-list').innerHTML=sorted.map(({h,pct:hp})=>{
     const hg=getGrade(hp);
-    return `<div class="habit-grade-row">
-      <div class="hg-emoji">${h.emoji}</div>
-      <div class="hg-info">
-        <div class="hg-name">${h.name}</div>
-        <div class="hg-bar-bg"><div class="hg-bar-fill" style="width:${hp}%;background:${hg.color}"></div></div>
-        <div class="hg-meta">${hp}% — ${days.filter(dk=>isChecked(h.id,dk)).length}/7 days</div>
-      </div>
-      <div class="hg-grade ${hg.cls}">${hg.g}</div>
-    </div>`;
+    const isTimed=h.habitType==='timed';
+    const weekSecs=isTimed?getWeekTotalTime(h.id):0;
+    /* For timed habits: also show daily breakdown as small bars */
+    let dayBars='';
+    if(isTimed){
+      const thr=getTimerThreshold(h.id);
+      dayBars='<div style="display:flex;gap:2px;margin-top:5px">'
+        +days.map(dk=>{
+          const secs=(logs[dk]&&logs[dk][h.id+'_time'])||0;
+          const dpct=thr>0?Math.min(secs/thr,1):0;
+          const isGoal=secs>=thr&&thr>0;
+          const d=new Date(dk);
+          const dayLbl=['S','M','T','W','T','F','S'][d.getDay()];
+          return '<div style="flex:1;text-align:center">'
+            +'<div style="height:28px;background:var(--bg);border-radius:4px;overflow:hidden;position:relative">'
+            +'<div style="position:absolute;bottom:0;left:0;right:0;height:'+(dpct*100)+'%;background:'+(isGoal?hg.color:'rgba(33,150,243,0.5)')+';border-radius:3px;transition:height 0.4s"></div>'
+            +'</div>'
+            +'<div style="font-size:9px;color:var(--text-hint);margin-top:2px">'+dayLbl+'</div>'
+            +'</div>';
+        }).join('')
+        +'</div>';
+    }
+    const metaLine=isTimed
+      ? hp+'% · '+days.filter(dk=>isChecked(h.id,dk)).length+'/7 days · ⏱ '+fmtSecs(weekSecs)
+      : hp+'% — '+days.filter(dk=>isChecked(h.id,dk)).length+'/7 days';
+    return '<div class="habit-grade-row">'
+      +'<div class="hg-emoji">'+h.emoji+'</div>'
+      +'<div class="hg-info">'
+      +'<div class="hg-name">'+h.name+'</div>'
+      +'<div class="hg-bar-bg"><div class="hg-bar-fill" style="width:'+hp+'%;background:'+hg.color+'"></div></div>'
+      +'<div class="hg-meta">'+metaLine+'</div>'
+      +dayBars
+      +'</div>'
+      +'<div class="hg-grade '+hg.cls+'">'+hg.g+'</div>'
+      +'</div>';
   }).join('');
 }
 
@@ -1708,8 +1787,10 @@ window.saveNewHabit=async function(){
   const name=document.getElementById('habit-inp').value.trim(); if(!name){document.getElementById('habit-inp').focus();return;}
   const reminderEnabled=document.getElementById('reminder-toggle-inp').checked;
   const reminderTime=document.getElementById('reminder-time-inp').value||'08:00';
-  const thresholdH=selHabitType==='timed'?(parseInt(document.getElementById('threshold-h-inp').value)||0):0;
-  const thresholdM=selHabitType==='timed'?(parseInt(document.getElementById('threshold-m-inp').value)||25):0;
+  const _thH=document.getElementById('threshold-h-inp').value;
+  const _thM=document.getElementById('threshold-m-inp').value;
+  const thresholdH=selHabitType==='timed'?(isNaN(parseInt(_thH))?0:parseInt(_thH)):0;
+  const thresholdM=selHabitType==='timed'?(isNaN(parseInt(_thM))?0:parseInt(_thM)):0;
   const h={id:`h${Date.now()}`,name,emoji:selEmoji,habitType:selHabitType||'check',thresholdH,thresholdM,reminderEnabled,reminderTime,order:habits.length,createdAt:Date.now()};
   closeModal('add-modal');
   await saveHabitToDb(h);
