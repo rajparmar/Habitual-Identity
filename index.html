@@ -1562,53 +1562,66 @@ function renderCalendar(){
 }
 function selectDay(dk){ selCalDate=dk; renderCalendar(); }
 function renderCalDetail(dk){
-  const[y,m,d]=dk.split('-'),el=document.getElementById('cal-detail');
+  const[y,m,d]=dk.split('-');
+  const el=document.getElementById('cal-detail');
   if(!habits.length){el.innerHTML='';return;}
   const MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const sc=habits.length?Math.round(habits.filter(h=>isChecked(h.id,dk)).length/habits.length*100):0;
   const g=getGrade(sc);
-  const isPast=dk<todayKey, isFuture=dk>todayKey;
-  const dateLabel=MONS[parseInt(m)-1]+' '+parseInt(d)+', '+y
+  const isFuture=dk>todayKey;
+
+  /* Build container fresh — use DOM nodes so event listeners survive */
+  el.innerHTML='';
+
+  /* Date header */
+  const hdr=document.createElement('div');
+  hdr.className='cal-detail-date';
+  hdr.innerHTML=MONS[parseInt(m)-1]+' '+parseInt(d)+', '+y
     +' — <span class="'+g.cls+'" style="font-weight:900">'+g.g+'</span> ('+sc+'%)'
     +(isFuture?' <span style="font-size:10px;color:var(--text-hint)">(future)</span>':'');
-  el.innerHTML='<div class="cal-detail-date">'+dateLabel+'</div>'
-    +habits.map(h=>{
-      const chk=isChecked(h.id,dk);
-      const isTimed2=h.habitType==='timed';
-      const calCheckCls='check-circle'+(chk?' checked':'');
-      const stroke=chk?'#fff':'#bbb';
-      const svgCheck='<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><polyline points="3,8 7,12 13,4" stroke="'+stroke+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-      if(isTimed2){
-        const timeSecs=(logs[dk]&&logs[dk][h.id+'_time'])||0;
-        const sub='<div class="habit-sub">'+(chk?'✅ Goal reached'+(timeSecs>0?' · ⏱ '+fmtSecs(timeSecs):''):'⏱ Time-based'+(timeSecs>0?' · '+fmtSecs(timeSecs)+' logged':''))+'</div>';
-        const opacity=chk?'1':'0.3';
-        return '<div class="habit-card '+(chk?'done-card':'')+'">'
-          +'<div class="habit-emoji">'+h.emoji+'</div>'
-          +'<div class="habit-body"><div class="habit-title">'+h.name+'</div>'+sub+'</div>'
-          +'<div class="'+calCheckCls+'" style="pointer-events:none;opacity:'+opacity+'">'+svgCheck+'</div></div>';
-      } else {
-        /* Checkbox habit — tappable on any day including past */
-        const sub=isFuture
-          ?'<div class="habit-sub" style="color:var(--text-hint)">Future date</div>'
-          :'<div class="habit-sub">'+(chk?'Completed ✓':'Not done')+'</div>';
-        const card=document.createElement('div');
-        card.className='habit-card'+(chk?' done-card':'');
-        card.style.cursor='pointer';
-        card.innerHTML='<div class="habit-emoji">'+h.emoji+'</div>'
-          +'<div class="habit-body"><div class="habit-title">'+h.name+'</div>'+sub+'</div>'
-          +'<div class="'+calCheckCls+'">'+svgCheck+'</div>';
-        /* Toggle on card click or check circle click, then re-render */
-        const doToggle=(e)=>{
-          e.stopPropagation();
-          toggleLog(h.id,dk,true,null).then(()=>{
-            renderCalendar(); /* re-render full calendar so day colours update */
-          });
-        };
-        card.onclick=doToggle;
-        card.querySelector('.'+calCheckCls.replace(' ','.')).onclick=doToggle;
-        return card.outerHTML;
-      }
-    }).join('');
+  el.appendChild(hdr);
+
+  /* One card per habit */
+  habits.forEach(h=>{
+    const chk=isChecked(h.id,dk);
+    const isTimed2=h.habitType==='timed';
+    const stroke=chk?'#fff':'#bbb';
+    const svgCheck='<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><polyline points="3,8 7,12 13,4" stroke="'+stroke+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+    const card=document.createElement('div');
+    card.className='habit-card'+(chk?' done-card':'');
+
+    if(isTimed2){
+      /* Timed — non-interactive, show logged time */
+      const timeSecs=(logs[dk]&&logs[dk][h.id+'_time'])||0;
+      const sub=chk
+        ?'✅ Goal reached'+(timeSecs>0?' · ⏱ '+fmtSecs(timeSecs):'')
+        :'⏱ Time-based'+(timeSecs>0?' · '+fmtSecs(timeSecs)+' logged':'');
+      card.innerHTML='<div class="habit-emoji">'+h.emoji+'</div>'
+        +'<div class="habit-body"><div class="habit-title">'+h.name+'</div>'
+        +'<div class="habit-sub">'+sub+'</div></div>'
+        +'<div class="check-circle'+(chk?' checked':'')+'" style="pointer-events:none;opacity:'+(chk?'1':'0.3')+'">'+svgCheck+'</div>';
+    } else {
+      /* Checkbox — fully tappable, appended as DOM node so onclick survives */
+      const sub=isFuture
+        ?'<span style="color:var(--text-hint)">Future date</span>'
+        :(chk?'Completed ✓':'Not done');
+      card.style.cursor='pointer';
+      card.innerHTML='<div class="habit-emoji">'+h.emoji+'</div>'
+        +'<div class="habit-body"><div class="habit-title">'+h.name+'</div>'
+        +'<div class="habit-sub">'+sub+'</div></div>'
+        +'<div class="check-circle'+(chk?' checked':'')+'">'+svgCheck+'</div>';
+
+      const doToggle=function(e){
+        e.stopPropagation();
+        toggleLog(h.id,dk,true,null).then(()=>renderCalendar());
+      };
+      card.addEventListener('click', doToggle);
+      card.querySelector('.check-circle').addEventListener('click', doToggle);
+    }
+
+    el.appendChild(card);
+  });
 }
 
 /* ── WEEKLY GRADE ── */
