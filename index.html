@@ -1149,6 +1149,13 @@ async function toggleLog(hid,dk,useSound=true,forceVal=null){
   const wasChecked=!!cur[hid];
   const newVal=forceVal!==null?forceVal:!wasChecked;
   if(useSound && forceVal===null){ wasChecked?playUncheck():playTick(); }
+  /* Optimistically update local logs so UI reflects change instantly */
+  logs[dk]=Object.assign({},cur,{[hid]:newVal});
+  /* Re-render immediately with optimistic data */
+  renderHeader();
+  if(document.getElementById('page-calendar').classList.contains('active')) renderCalendar();
+  if(document.getElementById('page-today').classList.contains('active')) renderToday();
+  /* Then persist to Firestore (onSnapshot will confirm and re-render again) */
   await setDoc(ref,{...cur,[hid]:newVal},{merge:true});
 }
 function toggle(hid,dk){ toggleLog(hid,dk,true,null); }
@@ -1614,7 +1621,7 @@ function renderCalDetail(dk){
 
       const doToggle=function(e){
         e.stopPropagation();
-        toggleLog(h.id,dk,true,null).then(()=>renderCalendar());
+        toggleLog(h.id,dk,true,null);
       };
       card.addEventListener('click', doToggle);
       card.querySelector('.check-circle').addEventListener('click', doToggle);
