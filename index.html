@@ -1181,7 +1181,7 @@ function fmtSecs(s){
 }
 function getTimerThreshold(hid){
   const h=habits.find(x=>x.id===hid); if(!h) return 0;
-  return ((h.thresholdH||0)*3600)+((h.thresholdM||25)*60);
+  return ((h.thresholdH||0)*3600)+((h.thresholdM!=null?h.thresholdM:25)*60);
 }
 function getTimerElapsed(hid){ const dl=logs[todayKey]||{}; return dl[hid+'_time']||0; }
 function getBreakSettings(){
