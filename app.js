@@ -15,7 +15,7 @@ const firebaseConfig = {
   measurementId: "G-ZBN0FX48C3"
 };
 
-const ALLOWED_EMAILS = ['rajparmarjb43@gmail.com','whatamiraj@gmail.com','arnavsingh2905@gmail.com'];
+const ALLOWED_EMAILS = ['rajparmarjb43@gmail.com','whatamiraj@gmail.com','arnavsingh2905@gmail.com','manvisingh0619@gmail.com'];
 
 const fbApp = initializeApp(firebaseConfig);
 const auth  = getAuth(fbApp);
