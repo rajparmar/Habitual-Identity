@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="HabitTick">
 <link rel="manifest" href="manifest.json">
-<title>Habitual Identity</title>
+<title>HabitTick</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -95,6 +95,10 @@
     <div class="habits-wrap">
       <div class="section-label">Today's habits</div>
       <div id="habit-list"></div>
+      <div id="task-section-today" style="display:none">
+        <div class="section-label-blue">📋 One-day tasks</div>
+        <div id="task-list-today"></div>
+      </div>
     </div>
   </div>
 
@@ -136,6 +140,7 @@
 </div>
 
 <button class="fab" id="fab" onclick="openAddModal()" style="display:none">+</button>
+<button class="task-fab" id="task-fab" onclick="openAddTaskModal()" title="Add one-day task">📋</button>
 
 <!-- ADD HABIT MODAL -->
 <div class="sheet-bg" id="add-modal" onclick="bgClose(event,'add-modal')">
@@ -234,6 +239,22 @@
           <span class="toggle-slider"></span>
         </label>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD TASK MODAL -->
+<div class="sheet-bg" id="add-task-modal" onclick="bgClose(event,'add-task-modal')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="task-modal-title">New one-day task</div>
+    <div class="input-label">Task name</div>
+    <input class="text-input" id="task-name-inp" placeholder="e.g. Buy groceries" maxlength="60"/>
+    <div class="input-label">For date</div>
+    <input class="text-input" id="task-date-inp" type="date" style="margin-bottom:16px"/>
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="closeModal('add-task-modal')">Cancel</button>
+      <button class="btn-save" style="background:#2196F3" onclick="saveNewTask()">Add task ✓</button>
     </div>
   </div>
 </div>

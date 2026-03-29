@@ -118,6 +118,8 @@ let currentUser=null, habits=[], logs={};
 let selEmoji=EMOJIS[0], selHabitType='check', calYear, calMonth, selCalDate, gradeWeekOffset=0, quoteIdx=0;
 let notifTimers=[], soundOn=true, prevAllDone=false;
 let timers={}, activeTimerModal=null, timerTick=null;
+let tasks={};        /* tasks[dateKey] = [{id,name,done},...] — one-day tasks, never affect stats */
+let unsubTasks=null; /* Firestore listener for tasks */
 let unsubHabits=null, unsubLogs=null;
 
 
@@ -262,7 +264,8 @@ window.signInWithGoogle=async function(){
 window.doSignOut=async function(){
   if(!confirm('Sign out of HabitTick?')) return;
   if(unsubHabits)unsubHabits(); if(unsubLogs)unsubLogs();
-  habits=[]; logs={};
+  habits=[]; logs={}; tasks={};
+  if(unsubTasks)unsubTasks();
   await fbSignOut(auth);
   closeModal('settings-modal');
   document.getElementById('login-screen').style.display='flex';
@@ -281,6 +284,7 @@ onAuthStateChanged(auth, user=>{
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').style.display='flex';
     document.getElementById('fab').style.display='flex';
+    document.getElementById('task-fab').style.display='flex';
     renderUserAvatar(user); renderHeader(); renderQuote();
     subscribeToData(user.uid);
   } else {
@@ -313,6 +317,13 @@ function subscribeToData(uid){
     });
     renderAll(); setSyncDot(''); hideLoading();
   }, e=>{ console.error(e); setSyncDot('offline'); hideLoading(); showToast('Sync error — check connection'); });
+  /* Tasks collection */
+  unsubTasks=onSnapshot(collection(db,`users/${uid}/tasks`), snap=>{
+    tasks={};
+    snap.docs.forEach(d=>{ tasks[d.id]=d.data().items||[]; });
+    renderTodayTasks();
+  }, e=>{ console.error('tasks error',e); });
+
   unsubLogs=onSnapshot(collection(db,`users/${uid}/logs`), snap=>{
     logs={}; snap.docs.forEach(d=>{ logs[d.id]=d.data(); });
     habits.forEach(h=>{
@@ -640,7 +651,7 @@ function checkAllDone(){
 }
 
 /* ── RENDER ALL ── */
-function renderAll(){ renderHeader(); renderToday(); renderCalendar(); renderGrade(); renderStats(); renderQuote(); scheduleAllReminders(); }
+function renderAll(){ renderHeader(); renderToday(); renderTodayTasks(); renderCalendar(); renderGrade(); renderStats(); renderQuote(); scheduleAllReminders(); }
 
 function renderHeader(){
   const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -774,6 +785,13 @@ function renderCalDetail(dk){
     +' — <span class="'+g.cls+'" style="font-weight:900">'+g.g+'</span> ('+sc+'%)'
     +(isFuture?' <span style="font-size:10px;color:var(--text-hint)">(future)</span>':'');
   el.appendChild(hdr);
+
+  /* One-day tasks section in calendar */
+  const taskWrap=document.createElement('div');
+  taskWrap.id='cal-task-wrap';
+  taskWrap.style.marginTop='12px';
+  el.appendChild(taskWrap);
+  renderCalTasks(dk);
 
   /* One card per habit */
   habits.forEach(h=>{
@@ -1100,6 +1118,137 @@ window.timerResetCard=function(hid){
 };
 
 
+/* ════ ONE-DAY TASK ENGINE ════ */
+async function saveTasksForDate(dk, items){
+  setSyncDot('syncing');
+  const ref=doc(db,`users/${currentUser.uid}/tasks/${dk}`);
+  await setDoc(ref,{items},{ merge:false });
+}
+
+function getTasksForDate(dk){ return tasks[dk]||[]; }
+
+function renderTodayTasks(){
+  const list=getTasksForDate(todayKey);
+  const section=document.getElementById('task-section-today');
+  const el=document.getElementById('task-list-today');
+  if(!section||!el) return;
+  section.style.display=list.length?'block':'none';
+  el.innerHTML='';
+  list.forEach((task,idx)=>{
+    const card=document.createElement('div');
+    card.className='task-card'+(task.done?' done-card':'');
+    card.innerHTML=
+      '<div class="task-emoji">📋</div>'
+      +'<div class="task-body">'
+      +'<div class="task-title">'+task.name+'</div>'
+      +'<div class="task-sub">One-day task</div>'
+      +'</div>'
+      +'<div class="task-check'+(task.done?' checked':'')+'"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><polyline points="3,8 7,12 13,4" stroke="'+(task.done?'#fff':'rgba(33,150,243,0.5)')+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+      +'<button class="task-delete" title="Delete task">✕</button>';
+    /* toggle done */
+    const toggleDone=()=>{
+      const updated=[...getTasksForDate(todayKey)];
+      updated[idx]={...updated[idx],done:!updated[idx].done};
+      tasks[todayKey]=updated;
+      renderTodayTasks();
+      saveTasksForDate(todayKey,updated);
+      if(!updated[idx].done) playUncheck(); else playTick();
+    };
+    card.querySelector('.task-check').addEventListener('click',e=>{e.stopPropagation();toggleDone();});
+    card.addEventListener('click',toggleDone);
+    /* delete */
+    card.querySelector('.task-delete').addEventListener('click',e=>{
+      e.stopPropagation();
+      const updated=getTasksForDate(todayKey).filter((_,i)=>i!==idx);
+      tasks[todayKey]=updated;
+      renderTodayTasks();
+      saveTasksForDate(todayKey,updated);
+      showToast('Task removed');
+    });
+    el.appendChild(card);
+  });
+}
+
+function renderCalTasks(dk){
+  /* Render task list for a given calendar date inside cal-detail */
+  const list=getTasksForDate(dk);
+  const isFuture=dk>todayKey;
+  const wrap=document.getElementById('cal-task-wrap');
+  if(!wrap) return;
+  /* Build task rows */
+  let html='';
+  list.forEach((task,idx)=>{
+    html+='<div class="task-card'+(task.done?' done-card':'')+'" style="cursor:pointer" data-idx="'+idx+'">'
+      +'<div class="task-emoji">📋</div>'
+      +'<div class="task-body"><div class="task-title">'+task.name+'</div>'
+      +'<div class="task-sub">One-day task</div></div>'
+      +'<div class="task-check'+(task.done?' checked':'')+'"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><polyline points="3,8 7,12 13,4" stroke="'+(task.done?'#fff':'rgba(33,150,243,0.5)')+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+      +'<button class="task-delete" data-del="'+idx+'" title="Delete">✕</button>'
+      +'</div>';
+  });
+  /* Add task button */
+  html+='<button class="cal-task-btn" id="cal-add-task-btn">+ Add one-day task</button>';
+  wrap.innerHTML=html;
+
+  /* Attach events */
+  wrap.querySelectorAll('.task-card').forEach(card=>{
+    const i=parseInt(card.dataset.idx);
+    const doToggle=()=>{
+      const updated=[...getTasksForDate(dk)];
+      updated[i]={...updated[i],done:!updated[i].done};
+      tasks[dk]=updated;
+      saveTasksForDate(dk,updated);
+      renderCalTasks(dk);
+      if(!updated[i].done) playUncheck(); else playTick();
+    };
+    card.addEventListener('click',doToggle);
+    card.querySelector('.task-check').addEventListener('click',e=>{e.stopPropagation();doToggle();});
+    card.querySelector('.task-delete').addEventListener('click',e=>{
+      e.stopPropagation();
+      const updated=getTasksForDate(dk).filter((_,j)=>j!==i);
+      tasks[dk]=updated;
+      saveTasksForDate(dk,updated);
+      renderCalTasks(dk);
+      showToast('Task removed');
+    });
+  });
+  document.getElementById('cal-add-task-btn').addEventListener('click',()=>{
+    openAddTaskModal(dk);
+  });
+}
+
+/* Open add-task modal — optionally pre-set a date */
+window.openAddTaskModal=function(presetDate){
+  const dateInp=document.getElementById('task-date-inp');
+  const nameInp=document.getElementById('task-name-inp');
+  nameInp.value='';
+  dateInp.value=presetDate||todayKey;
+  document.getElementById('task-modal-title').textContent='New one-day task';
+  document.getElementById('add-task-modal').classList.add('open');
+  setTimeout(()=>nameInp.focus(),100);
+};
+
+window.saveNewTask=async function(){
+  const name=document.getElementById('task-name-inp').value.trim();
+  const dk=document.getElementById('task-date-inp').value||todayKey;
+  if(!name){ document.getElementById('task-name-inp').focus(); return; }
+  const newTask={id:'t'+Date.now(),name,done:false};
+  const updated=[...getTasksForDate(dk),newTask];
+  tasks[dk]=updated;
+  closeModal('add-task-modal');
+  /* Re-render whichever view is showing */
+  if(dk===todayKey) renderTodayTasks();
+  /* If calendar is showing this date, update it */
+  const calActive=document.getElementById('page-calendar').classList.contains('active');
+  if(calActive) renderCalTasks(dk);
+  await saveTasksForDate(dk,updated);
+  showToast('Task added for '+(dk===todayKey?'today':dk));
+};
+
+document.getElementById('task-name-inp').addEventListener('keydown',e=>{
+  if(e.key==='Enter') saveNewTask();
+});
+
 /* ── TABS ── */
 window.switchTab=function(tab){
   ['today','calendar','grade','stats'].forEach(t=>{
@@ -1107,6 +1256,7 @@ window.switchTab=function(tab){
     document.getElementById(`page-${t}`).classList.toggle('active',t===tab);
   });
   document.getElementById('fab').style.display=tab==='today'?'flex':'none';
+  document.getElementById('task-fab').style.display=tab==='today'?'flex':'none';
   if(tab==='calendar')renderCalendar();
   if(tab==='grade')renderGrade();
   if(tab==='stats'){ renderStats(); setTimeout(drawTrendChart,80); }
