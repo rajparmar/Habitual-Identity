@@ -1,272 +1,310 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#7F77DD" id="theme-color-meta">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="HabitTick">
-<link rel="manifest" href="manifest.json">
-<title>Habitual Identity</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#7F77DD" id="theme-color-meta">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="HabitTick">
+  <link rel="manifest" href="manifest.json">
+  <title>Habitual Identity</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<canvas id="confetti-canvas"></canvas>
-<div id="loading-overlay" class="show"><div class="spinner"></div><div class="loading-text">Loading HabitTick...</div></div>
-
-<!-- LOGIN -->
-<div id="login-screen">
-  <div class="login-logo">🎯</div>
-  <div class="login-title">Habit<span>Tick</span></div>
-  <div class="login-sub">Build better habits. Track streaks.<br>Sync across all devices.</div>
-  <div class="login-features">
-    <div class="login-feature"><span>📱</span> Phone & PC — always in sync</div>
-    <div class="login-feature"><span>🔥</span> Streak visuals that escalate with progress</div>
-    <div class="login-feature"><span>🏆</span> Weekly grading SSS → F</div>
-    <div class="login-feature"><span>🌙</span> Dark mode with black → red gradient</div>
-    <div class="login-feature"><span>⏰</span> Per-habit reminders</div>
-  </div>
-  <button class="google-btn" onclick="signInWithGoogle()">
-    <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-    Continue with Google
-  </button>
-  <div class="login-note">Only authorised accounts can access this app.</div>
-</div>
-
-<!-- MAIN APP -->
-<div id="app" style="display:none">
-  <div class="status-spacer"></div>
-  <div class="header">
-    <div class="header-left">
-      <div>
-        <div class="app-name">Habit<span>Tick</span></div>
-        <div class="app-date" id="hdr-date"></div>
-      </div>
-    </div>
-    <div class="hdr-btns">
-      <div class="sync-dot" id="sync-dot"></div>
-      <button class="hdr-btn" id="dark-toggle" onclick="toggleDark()">🌙</button>
-      <button class="hdr-btn" id="sound-btn" onclick="toggleSound()">🔊</button>
-      <div id="user-avatar-wrap" onclick="openSettings()"></div>
-    </div>
+  <canvas id="confetti-canvas"></canvas>
+  <div id="loading-overlay" class="show">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading HabitTick...</div>
   </div>
 
-  <div class="score-bar">
-    <div class="score-ring-wrap">
-      <svg viewBox="0 0 68 68">
-        <circle cx="34" cy="34" r="28" fill="none" stroke="var(--ring-track)" stroke-width="5"/>
-        <circle id="score-arc" cx="34" cy="34" r="28" fill="none" stroke="var(--ring-stroke)" stroke-width="5"
-          stroke-dasharray="175.9" stroke-dashoffset="175.9" stroke-linecap="round"
-          style="transition:stroke-dashoffset 0.5s ease"/>
+  <!-- LOGIN -->
+  <div id="login-screen">
+    <div class="login-logo">🎯</div>
+    <div class="login-title">Habit<span>Tick</span></div>
+    <div class="login-sub">Build better habits. Track streaks.<br>Sync across all devices.</div>
+    <div class="login-features">
+      <div class="login-feature"><span>📱</span> Phone & PC — always in sync</div>
+      <div class="login-feature"><span>🔥</span> Streak visuals that escalate with progress</div>
+      <div class="login-feature"><span>🏆</span> Weekly grading SSS → F</div>
+      <div class="login-feature"><span>🌙</span> Dark mode with black → red gradient</div>
+      <div class="login-feature"><span>⏰</span> Per-habit reminders</div>
+    </div>
+    <button class="google-btn" onclick="signInWithGoogle()">
+      <svg width="20" height="20" viewBox="0 0 48 48">
+        <path fill="#EA4335"
+          d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+        <path fill="#4285F4"
+          d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+        <path fill="#FBBC05"
+          d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+        <path fill="#34A853"
+          d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
       </svg>
-      <div class="score-pct-text" id="score-pct-txt">0%</div>
-    </div>
-    <div class="score-info">
-      <div class="score-big" id="score-fraction">0 / 0</div>
-      <div class="score-small">habits done today</div>
-      <div class="score-msg" id="score-msg"></div>
-    </div>
+      Continue with Google
+    </button>
+    <div class="login-note">Only authorised accounts can access this app.</div>
   </div>
 
-  <div class="notif-banner" id="notif-banner">
-    <div class="nb-text">Enable notifications to get habit reminders.</div>
-    <button class="nb-btn" onclick="requestNotif()">Allow</button>
-    <button class="nb-close" onclick="document.getElementById('notif-banner').classList.remove('show')">✕</button>
-  </div>
-
-  <div class="tab-bar">
-    <div class="tab active" onclick="switchTab('today')" id="tab-today"><span class="ti">☀️</span>Today</div>
-    <div class="tab" onclick="switchTab('calendar')" id="tab-calendar"><span class="ti">📅</span>Cal</div>
-    <div class="tab" onclick="switchTab('grade')" id="tab-grade"><span class="ti">🏆</span>Grade</div>
-    <div class="tab" onclick="switchTab('stats')" id="tab-stats"><span class="ti">📊</span>Stats</div>
-  </div>
-
-  <div class="page active" id="page-today">
-    <div class="quote-card">
-      <div class="quote-mark">"</div>
-      <div class="quote-body">
-        <div class="quote-text" id="quote-text"></div>
-        <div class="quote-author" id="quote-author"></div>
-      </div>
-      <button class="quote-refresh" onclick="nextQuote()">↻</button>
-    </div>
-    <div class="habits-wrap">
-      <div class="section-label">Today's habits</div>
-      <div id="habit-list"></div>
-    </div>
-  </div>
-
-  <div class="page" id="page-calendar">
-    <div class="cal-header">
-      <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
-      <span class="cal-month" id="cal-month-lbl"></span>
-      <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
-    </div>
-    <div class="dow-row"><div class="dow-cell">SU</div><div class="dow-cell">MO</div><div class="dow-cell">TU</div><div class="dow-cell">WE</div><div class="dow-cell">TH</div><div class="dow-cell">FR</div><div class="dow-cell">SA</div></div>
-    <div class="cal-grid" id="cal-grid"></div>
-    <div class="cal-detail" id="cal-detail"></div>
-  </div>
-
-  <div class="page" id="page-grade">
-    <div class="grade-wrap">
-      <div class="week-nav">
-        <button class="cal-nav-btn" onclick="changeWeek(-1)">‹</button>
-        <span class="week-label" id="week-label"></span>
-        <button class="cal-nav-btn" onclick="changeWeek(1)">›</button>
-      </div>
-      <div id="big-grade-card"></div>
-      <div class="section-label">Habit breakdown</div>
-      <div class="habit-grade-list" id="habit-grade-list"></div>
-    </div>
-  </div>
-
-  <div class="page" id="page-stats">
-    <div class="stats-wrap">
-      <div class="stat-grid" id="stat-grid"></div>
-      <div class="section-label">30-day trend</div>
-      <div class="trend-wrap"><canvas id="trend-canvas" height="120" style="width:100%;display:block"></canvas></div>
-      <div class="section-label">30-day activity</div>
-      <div class="heatmap-row" id="heatmap"></div>
-      <div class="section-label">Per habit</div>
-      <div id="habit-stat-rows"></div>
-    </div>
-  </div>
-</div>
-
-<button class="fab" id="fab" onclick="openAddModal()" style="display:none">+</button>
-
-<!-- ADD HABIT MODAL -->
-<div class="sheet-bg" id="add-modal" onclick="bgClose(event,'add-modal')">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">New habit</div>
-    <div class="input-label">Habit name</div>
-    <input class="text-input" id="habit-inp" placeholder="e.g. Read 20 minutes" maxlength="40"/>
-    <div class="input-label">Type</div>
-    <div style="display:flex;gap:8px;margin-bottom:16px">
-      <button id="type-check-btn" onclick="setHabitType('check')" style="flex:1;padding:10px;border-radius:12px;border:2px solid var(--acc);background:var(--acc-light);color:var(--acc);font-weight:700;font-size:13px;cursor:pointer">✅ Checkbox</button>
-      <button id="type-timed-btn" onclick="setHabitType('timed')" style="flex:1;padding:10px;border-radius:12px;border:2px solid var(--border2);background:var(--bg);color:var(--text-sec);font-weight:700;font-size:13px;cursor:pointer">⏱ Time-based</button>
-    </div>
-    <div id="threshold-row" style="display:none;margin-bottom:16px">
-      <div class="input-label">Threshold (target time)</div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input type="number" class="text-input" id="threshold-h-inp" placeholder="0" min="0" max="23" style="margin-bottom:0;width:60px;text-align:center" value="0"/>
-        <span style="color:var(--text-sec);font-weight:600">h</span>
-        <input type="number" class="text-input" id="threshold-m-inp" placeholder="0" min="0" max="59" style="margin-bottom:0;width:60px;text-align:center" value="0"/>
-        <span style="color:var(--text-sec);font-weight:600">min</span>
-      </div>
-      <div style="font-size:11px;color:var(--text-hint);margin-top:6px">Habit auto-completes when this time is reached</div>
-    </div>
-    <div class="input-label">Icon</div>
-    <div class="emoji-grid" id="emoji-grid"></div>
-    <div class="input-label">Reminder</div>
-    <div class="reminder-row">
-      <label class="reminder-toggle"><input type="checkbox" id="reminder-toggle-inp"><span class="toggle-slider"></span></label>
-      <span class="reminder-label">Daily reminder</span>
-      <input type="time" class="time-input" id="reminder-time-inp" value="08:00" style="display:none">
-    </div>
-    <div class="btn-row">
-      <button class="btn-cancel" onclick="closeModal('add-modal')">Cancel</button>
-      <button class="btn-save" onclick="saveNewHabit()">Add habit ✓</button>
-    </div>
-  </div>
-</div>
-
-<!-- TIMER FULLSCREEN MODAL -->
-<div class="timer-modal-bg" id="timer-modal" onclick="if(event.target===this)closeTimerModal()">
-  <div class="timer-modal" id="tm-modal-inner">
-    <button class="tm-close" onclick="closeTimerModal()">✕</button>
-    <div class="tm-habit-name" id="tm-habit-name"></div>
-    <div class="tm-threshold" id="tm-threshold-label"></div>
-
-    <!-- Break banner (shown during break) -->
-    <div class="tm-break-banner" id="tm-break-banner">☕ Break time!</div>
-
-    <div class="tm-ring-wrap" id="tm-ring-wrap">
-      <svg viewBox="0 0 120 120">
-        <circle cx="60" cy="60" r="52" fill="none" stroke="var(--border2)" stroke-width="7"/>
-        <circle id="tm-ring-fill" class="tm-ring-fill-el" cx="60" cy="60" r="52" fill="none" stroke="var(--acc)" stroke-width="7"
-          stroke-dasharray="326.7" stroke-dashoffset="326.7" stroke-linecap="round"
-          style="transition:stroke-dashoffset 0.5s linear,stroke 0.3s"/>
-      </svg>
-      <div class="tm-ring-center">
-        <div class="tm-time-big" id="tm-time-big">00:00</div>
-        <div class="tm-time-label" id="tm-time-label">elapsed</div>
-      </div>
-    </div>
-
-    <div class="tm-status" id="tm-status"></div>
-
-    <div class="tm-controls">
-      <button class="tm-btn reset-big" id="tm-reset-btn" onclick="timerReset()">↺ Reset</button>
-      <button class="tm-btn start-big" id="tm-start-btn" onclick="timerToggle()">▶ Start</button>
-    </div>
-
-    <!-- Skip break button (only shown during break) -->
-    <button class="tm-skip-btn" id="tm-skip-btn" onclick="skipBreak()">⏭ Skip break — back to session</button>
-
-    <div class="tm-session-info" id="tm-session-info"></div>
-    <div class="tm-total-time" id="tm-total-time"></div>
-
-    <!-- Break settings (collapsible) -->
-    <button class="tm-settings-toggle" onclick="toggleBreakSettings()">⚙️ Break settings</button>
-    <div class="tm-break-settings" id="tm-break-settings">
-      <div class="tm-bs-row">
-        <span class="tm-bs-label">Work before break</span>
-        <div class="tm-bs-val">
-          <input class="tm-bs-inp" id="bs-work-m" type="number" min="1" max="120" value="25"/>
-          <span class="tm-bs-unit">min</span>
+  <!-- MAIN APP -->
+  <div id="app" style="display:none">
+    <div class="status-spacer"></div>
+    <div class="header">
+      <div class="header-left">
+        <div>
+          <div class="app-name">Habit<span>Tick</span></div>
+          <div class="app-date" id="hdr-date"></div>
         </div>
       </div>
-      <div class="tm-bs-row">
-        <span class="tm-bs-label">Break duration</span>
-        <div class="tm-bs-val">
-          <input class="tm-bs-inp" id="bs-break-m" type="number" min="1" max="60" value="5"/>
-          <span class="tm-bs-unit">min</span>
+      <div class="hdr-btns">
+        <div class="sync-dot" id="sync-dot"></div>
+        <button class="hdr-btn" id="dark-toggle" onclick="toggleDark()">🌙</button>
+        <button class="hdr-btn" id="sound-btn" onclick="toggleSound()">🔊</button>
+        <div id="user-avatar-wrap" onclick="openSettings()"></div>
+      </div>
+    </div>
+
+    <div class="score-bar">
+      <div class="score-ring-wrap">
+        <svg viewBox="0 0 68 68">
+          <circle cx="34" cy="34" r="28" fill="none" stroke="var(--ring-track)" stroke-width="5" />
+          <circle id="score-arc" cx="34" cy="34" r="28" fill="none" stroke="var(--ring-stroke)" stroke-width="5"
+            stroke-dasharray="175.9" stroke-dashoffset="175.9" stroke-linecap="round"
+            style="transition:stroke-dashoffset 0.5s ease" />
+        </svg>
+        <div class="score-pct-text" id="score-pct-txt">0%</div>
+      </div>
+      <div class="score-info">
+        <div class="score-big" id="score-fraction">0 / 0</div>
+        <div class="score-small">habits done today</div>
+        <div class="score-msg" id="score-msg"></div>
+      </div>
+    </div>
+
+    <div class="notif-banner" id="notif-banner">
+      <div class="nb-text">Enable notifications to get habit reminders.</div>
+      <button class="nb-btn" onclick="requestNotif()">Allow</button>
+      <button class="nb-close" onclick="document.getElementById('notif-banner').classList.remove('show')">✕</button>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab active" onclick="switchTab('today')" id="tab-today"><span class="ti">☀️</span>Today</div>
+      <div class="tab" onclick="switchTab('calendar')" id="tab-calendar"><span class="ti">📅</span>Cal</div>
+      <div class="tab" onclick="switchTab('grade')" id="tab-grade"><span class="ti">🏆</span>Grade</div>
+      <div class="tab" onclick="switchTab('stats')" id="tab-stats"><span class="ti">📊</span>Stats</div>
+    </div>
+
+    <div class="page active" id="page-today">
+      <div class="quote-card">
+        <div class="quote-mark">"</div>
+        <div class="quote-body">
+          <div class="quote-text" id="quote-text"></div>
+          <div class="quote-author" id="quote-author"></div>
+        </div>
+        <button class="quote-refresh" onclick="nextQuote()">↻</button>
+      </div>
+      <div class="habits-wrap">
+        <div class="section-label">Today's habits</div>
+        <div id="habit-list"></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-calendar">
+      <div class="cal-header">
+        <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+        <span class="cal-month" id="cal-month-lbl"></span>
+        <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="dow-row">
+        <div class="dow-cell">SU</div>
+        <div class="dow-cell">MO</div>
+        <div class="dow-cell">TU</div>
+        <div class="dow-cell">WE</div>
+        <div class="dow-cell">TH</div>
+        <div class="dow-cell">FR</div>
+        <div class="dow-cell">SA</div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-detail" id="cal-detail"></div>
+    </div>
+
+    <div class="page" id="page-grade">
+      <div class="grade-wrap">
+        <div class="week-nav">
+          <button class="cal-nav-btn" onclick="changeWeek(-1)">‹</button>
+          <span class="week-label" id="week-label"></span>
+          <button class="cal-nav-btn" onclick="changeWeek(1)">›</button>
+        </div>
+        <div id="big-grade-card"></div>
+        <div class="section-label">Habit breakdown</div>
+        <div class="habit-grade-list" id="habit-grade-list"></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-stats">
+      <div class="stats-wrap">
+        <div class="stat-grid" id="stat-grid"></div>
+        <div class="section-label">30-day trend</div>
+        <div class="trend-wrap"><canvas id="trend-canvas" height="120" style="width:100%;display:block"></canvas></div>
+        <div class="section-label">30-day activity</div>
+        <div class="heatmap-row" id="heatmap"></div>
+        <div class="section-label">Per habit</div>
+        <div id="habit-stat-rows"></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="fab" id="fab" onclick="openAddModal()" style="display:none">+</button>
+
+  <!-- ADD HABIT MODAL -->
+  <div class="sheet-bg" id="add-modal" onclick="bgClose(event,'add-modal')">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">New habit</div>
+      <div class="input-label">Habit name</div>
+      <input class="text-input" id="habit-inp" placeholder="e.g. Read 20 minutes" maxlength="40" />
+      <div class="input-label">Type</div>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <button id="type-check-btn" onclick="setHabitType('check')"
+          style="flex:1;padding:10px;border-radius:12px;border:2px solid var(--acc);background:var(--acc-light);color:var(--acc);font-weight:700;font-size:13px;cursor:pointer">✅
+          Checkbox</button>
+        <button id="type-timed-btn" onclick="setHabitType('timed')"
+          style="flex:1;padding:10px;border-radius:12px;border:2px solid var(--border2);background:var(--bg);color:var(--text-sec);font-weight:700;font-size:13px;cursor:pointer">⏱
+          Time-based</button>
+      </div>
+      <div id="threshold-row" style="display:none;margin-bottom:16px">
+        <div class="input-label">Threshold (target time)</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="number" class="text-input" id="threshold-h-inp" placeholder="0" min="0" max="23"
+            style="margin-bottom:0;width:60px;text-align:center" value="0" />
+          <span style="color:var(--text-sec);font-weight:600">h</span>
+          <input type="number" class="text-input" id="threshold-m-inp" placeholder="0" min="0" max="59"
+            style="margin-bottom:0;width:60px;text-align:center" value="0" />
+          <span style="color:var(--text-sec);font-weight:600">min</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-hint);margin-top:6px">Habit auto-completes when this time is reached
         </div>
       </div>
-      <div class="tm-bs-row" style="margin-bottom:0">
-        <span class="tm-bs-label">Breaks enabled</span>
-        <label class="reminder-toggle" style="margin:0">
-          <input type="checkbox" id="bs-enabled" checked>
-          <span class="toggle-slider"></span>
-        </label>
+      <div class="input-label">Icon</div>
+      <div class="emoji-grid" id="emoji-grid"></div>
+      <div class="input-label">Reminder</div>
+      <div class="reminder-row">
+        <label class="reminder-toggle"><input type="checkbox" id="reminder-toggle-inp"><span
+            class="toggle-slider"></span></label>
+        <span class="reminder-label">Daily reminder</span>
+        <input type="time" class="time-input" id="reminder-time-inp" value="08:00" style="display:none">
+      </div>
+      <div class="btn-row">
+        <button class="btn-cancel" onclick="closeModal('add-modal')">Cancel</button>
+        <button class="btn-save" onclick="saveNewHabit()">Add habit ✓</button>
       </div>
     </div>
   </div>
-</div>
 
-<!-- SETTINGS MODAL -->
-<div class="sheet-bg" id="settings-modal" onclick="bgClose(event,'settings-modal')">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">Account & Settings</div>
-    <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg);border-radius:14px;margin-bottom:18px">
-      <img id="settings-avatar" src="" width="48" height="48" style="border-radius:50%;display:none;border:2px solid var(--acc)">
-      <div id="settings-avatar-placeholder" style="width:48px;height:48px;border-radius:50%;background:var(--acc-light);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--acc)"></div>
-      <div>
-        <div style="font-size:16px;font-weight:600;color:var(--text)" id="settings-name">—</div>
-        <div style="font-size:13px;color:var(--text-sec)" id="settings-email">—</div>
+  <!-- TIMER FULLSCREEN MODAL -->
+  <div class="timer-modal-bg" id="timer-modal" onclick="if(event.target===this)closeTimerModal()">
+    <div class="timer-modal" id="tm-modal-inner">
+      <button class="tm-close" onclick="closeTimerModal()">✕</button>
+      <div class="tm-habit-name" id="tm-habit-name"></div>
+      <div class="tm-threshold" id="tm-threshold-label"></div>
+
+      <!-- Break banner (shown during break) -->
+      <div class="tm-break-banner" id="tm-break-banner">☕ Break time!</div>
+
+      <div class="tm-ring-wrap" id="tm-ring-wrap">
+        <svg viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="var(--border2)" stroke-width="7" />
+          <circle id="tm-ring-fill" class="tm-ring-fill-el" cx="60" cy="60" r="52" fill="none" stroke="var(--acc)"
+            stroke-width="7" stroke-dasharray="326.7" stroke-dashoffset="326.7" stroke-linecap="round"
+            style="transition:stroke-dashoffset 0.5s linear,stroke 0.3s" />
+        </svg>
+        <div class="tm-ring-center">
+          <div class="tm-time-big" id="tm-time-big">00:00</div>
+          <div class="tm-time-label" id="tm-time-label">elapsed</div>
+        </div>
+      </div>
+
+      <div class="tm-status" id="tm-status"></div>
+
+      <div class="tm-controls">
+        <button class="tm-btn reset-big" id="tm-reset-btn" onclick="timerReset()">↺ Reset</button>
+        <button class="tm-btn start-big" id="tm-start-btn" onclick="timerToggle()">▶ Start</button>
+      </div>
+
+      <!-- Skip break button (only shown during break) -->
+      <button class="tm-skip-btn" id="tm-skip-btn" onclick="skipBreak()">⏭ Skip break — back to session</button>
+
+      <div class="tm-session-info" id="tm-session-info"></div>
+      <div class="tm-total-time" id="tm-total-time"></div>
+
+      <!-- Break settings (collapsible) -->
+      <button class="tm-settings-toggle" onclick="toggleBreakSettings()">⚙️ Break settings</button>
+      <div class="tm-break-settings" id="tm-break-settings">
+        <div class="tm-bs-row">
+          <span class="tm-bs-label">Work before break</span>
+          <div class="tm-bs-val">
+            <input class="tm-bs-inp" id="bs-work-m" type="number" min="1" max="120" value="25" />
+            <span class="tm-bs-unit">min</span>
+          </div>
+        </div>
+        <div class="tm-bs-row">
+          <span class="tm-bs-label">Break duration</span>
+          <div class="tm-bs-val">
+            <input class="tm-bs-inp" id="bs-break-m" type="number" min="1" max="60" value="5" />
+            <span class="tm-bs-unit">min</span>
+          </div>
+        </div>
+        <div class="tm-bs-row" style="margin-bottom:0">
+          <span class="tm-bs-label">Breaks enabled</span>
+          <label class="reminder-toggle" style="margin:0">
+            <input type="checkbox" id="bs-enabled" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
       </div>
     </div>
-    <div style="font-size:13px;color:var(--text-sec);line-height:1.9;margin-bottom:16px">
-      <strong style="color:var(--text)">Habits:</strong> <span id="settings-habit-count">0</span> &nbsp;·&nbsp;
-      <strong style="color:var(--text)">Completions:</strong> <span id="settings-log-count">0</span><br>
-      <strong style="color:var(--text)">Sync:</strong> Real-time ✅ &nbsp;·&nbsp;
-      <strong style="color:var(--text)">Sound:</strong> <span id="s-sound-lbl">On</span>
-    </div>
-    <div style="display:flex;gap:10px">
-      <button class="btn-cancel" onclick="closeModal('settings-modal')">Close</button>
-      <button class="btn-danger" onclick="clearAllData()">Clear data</button>
-      <button style="flex:1;padding:14px;background:#FEE2E2;border:none;border-radius:14px;font-size:14px;font-weight:600;color:#DC2626;cursor:pointer" onclick="doSignOut()">Sign out</button>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="sheet-bg" id="settings-modal" onclick="bgClose(event,'settings-modal')">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Account & Settings</div>
+      <div
+        style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg);border-radius:14px;margin-bottom:18px">
+        <img id="settings-avatar" src="" width="48" height="48"
+          style="border-radius:50%;display:none;border:2px solid var(--acc)">
+        <div id="settings-avatar-placeholder"
+          style="width:48px;height:48px;border-radius:50%;background:var(--acc-light);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--acc)">
+        </div>
+        <div>
+          <div style="font-size:16px;font-weight:600;color:var(--text)" id="settings-name">—</div>
+          <div style="font-size:13px;color:var(--text-sec)" id="settings-email">—</div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--text-sec);line-height:1.9;margin-bottom:16px">
+        <strong style="color:var(--text)">Habits:</strong> <span id="settings-habit-count">0</span> &nbsp;·&nbsp;
+        <strong style="color:var(--text)">Completions:</strong> <span id="settings-log-count">0</span><br>
+        <strong style="color:var(--text)">Sync:</strong> Real-time ✅ &nbsp;·&nbsp;
+        <strong style="color:var(--text)">Sound:</strong> <span id="s-sound-lbl">On</span>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-cancel" onclick="closeModal('settings-modal')">Close</button>
+        <button class="btn-danger" onclick="clearAllData()">Clear data</button>
+        <button
+          style="flex:1;padding:14px;background:#FEE2E2;border:none;border-radius:14px;font-size:14px;font-weight:600;color:#DC2626;cursor:pointer"
+          onclick="doSignOut()">Sign out</button>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="toast" id="toast"></div>
+  <div class="toast" id="toast"></div>
 
-<script type="module" src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
+
 </html>
