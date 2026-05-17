@@ -259,6 +259,34 @@
   </div>
 </div>
 
+<!-- EDIT THRESHOLD MODAL -->
+<div class="sheet-bg" id="edit-threshold-modal" onclick="bgClose(event,'edit-threshold-modal')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Change goal time</div>
+    <input type="hidden" id="edit-thresh-hid"/>
+    <div style="background:var(--acc-light);border:1px solid var(--acc-mid);border-radius:12px;padding:12px 14px;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:700;color:var(--text)" id="edit-thresh-name"></div>
+      <div style="font-size:12px;color:var(--text-sec);margin-top:3px" id="edit-thresh-note"></div>
+    </div>
+    <div class="input-label">New goal time</div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+      <input type="number" class="text-input" id="edit-thresh-h" placeholder="0" min="0" max="23" style="margin-bottom:0;width:65px;text-align:center" value="0"/>
+      <span style="color:var(--text-sec);font-weight:600">h</span>
+      <input type="number" class="text-input" id="edit-thresh-m" placeholder="0" min="0" max="59" style="margin-bottom:0;width:65px;text-align:center" value="0"/>
+      <span style="color:var(--text-sec);font-weight:600">min</span>
+    </div>
+    <div style="background:rgba(33,150,243,0.08);border:1px solid rgba(33,150,243,0.2);border-radius:10px;padding:10px 13px;margin-bottom:16px;font-size:12px;color:#1565C0;line-height:1.6">
+      ⓘ This change applies <strong>from today onwards</strong>.<br>
+      Past days keep their original goal and completion status unchanged.
+    </div>
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="closeModal('edit-threshold-modal')">Cancel</button>
+      <button class="btn-save" style="background:#2196F3" onclick="saveEditThreshold()">Save new goal ✓</button>
+    </div>
+  </div>
+</div>
+
 <!-- SETTINGS MODAL -->
 <div class="sheet-bg" id="settings-modal" onclick="bgClose(event,'settings-modal')">
   <div class="sheet">

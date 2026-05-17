@@ -377,8 +377,18 @@ function fmtSecs(s){
   if(h>0) return h+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
   return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
 }
-function getTimerThreshold(hid){
+function getTimerThreshold(hid, dateKey){
   const h=habits.find(x=>x.id===hid); if(!h) return 0;
+  /* If no date given, use today (for live timer) */
+  const dk=dateKey||todayKey;
+  /* Look up threshold history — find the most recent entry on or before dk */
+  if(h.thresholdHistory&&h.thresholdHistory.length>0){
+    /* Sort descending by date, pick first entry where from <= dk */
+    const sorted=[...h.thresholdHistory].sort((a,b)=>b.from.localeCompare(a.from));
+    const entry=sorted.find(e=>e.from<=dk);
+    if(entry) return ((entry.thresholdH||0)*3600)+((entry.thresholdM!=null?entry.thresholdM:0)*60);
+  }
+  /* Fall back to top-level fields (backward compat for old habits) */
   return ((h.thresholdH||0)*3600)+((h.thresholdM!=null?h.thresholdM:25)*60);
 }
 function getTimerElapsed(hid){ const dl=logs[todayKey]||{}; return dl[hid+'_time']||0; }
@@ -806,9 +816,10 @@ function renderCalDetail(dk){
     if(isTimed2){
       /* Timed — non-interactive, show logged time */
       const timeSecs=(logs[dk]&&logs[dk][h.id+'_time'])||0;
+      const thrForDay=getTimerThreshold(h.id,dk);
       const sub=chk
-        ?'✅ Goal reached'+(timeSecs>0?' · ⏱ '+fmtSecs(timeSecs):'')
-        :'⏱ Time-based'+(timeSecs>0?' · '+fmtSecs(timeSecs)+' logged':'');
+        ?'✅ Goal reached'+(timeSecs>0?' · ⏱ '+fmtSecs(timeSecs)+' / '+fmtSecs(thrForDay):'')
+        :'⏱ Time-based'+(timeSecs>0?' · '+fmtSecs(timeSecs)+' / '+fmtSecs(thrForDay)+' logged':'goal was '+fmtSecs(thrForDay));
       card.innerHTML='<div class="habit-emoji">'+h.emoji+'</div>'
         +'<div class="habit-body"><div class="habit-title">'+h.name+'</div>'
         +'<div class="habit-sub">'+sub+'</div></div>'
@@ -927,7 +938,9 @@ function renderStats(){
   if(!habits.length){rows.innerHTML=`<div style="color:var(--text-hint);font-size:14px;text-align:center;padding:20px 0">No habits yet</div>`;return;}
   const td=Math.max(1,Math.ceil((now-new Date(Object.keys(logs).sort()[0]||now))/86400000)+1);
   rows.innerHTML=habits.map(h=>{ const c=getCompletions(h.id),r=Math.round(c/td*100),s=getStreak(h.id);
-    return `<div class="habit-stat-row"><div style="font-size:clamp(22px,6vw,28px)">${h.emoji}</div><div class="habit-stat-bar-wrap"><div class="habit-stat-name">${h.name}</div><div class="habit-stat-bar-bg"><div class="habit-stat-bar-fill" style="width:${Math.min(r,100)}%"></div></div><div class="habit-stat-meta">${c} completions · ${s}d streak · ${r}% rate</div></div><button class="del-habit-btn" onclick="confirmDelete('${h.id}')">🗑️</button></div>`;
+    const thrStr=h.habitType==='timed'?` · Goal: ${fmtSecs(getTimerThreshold(h.id,todayKey))}`:'';
+    const editBtn=h.habitType==='timed'?`<button class="del-habit-btn" onclick="openEditThresholdModal('${h.id}')" title="Change goal time" style="color:#2196F3;font-size:14px">✏️</button>`:'';
+    return `<div class="habit-stat-row"><div style="font-size:clamp(22px,6vw,28px)">${h.emoji}</div><div class="habit-stat-bar-wrap"><div class="habit-stat-name">${h.name}</div><div class="habit-stat-bar-bg"><div class="habit-stat-bar-fill" style="width:${Math.min(r,100)}%"></div></div><div class="habit-stat-meta">${c} completions · ${s}d streak · ${r}% rate${thrStr}</div></div>${editBtn}<button class="del-habit-btn" onclick="confirmDelete('${h.id}')">🗑️</button></div>`;
   }).join('');
 }
 
@@ -1032,11 +1045,47 @@ window.saveNewHabit=async function(){
   const _thM=document.getElementById('threshold-m-inp').value;
   const thresholdH=selHabitType==='timed'?(isNaN(parseInt(_thH))?0:parseInt(_thH)):0;
   const thresholdM=selHabitType==='timed'?(isNaN(parseInt(_thM))?0:parseInt(_thM)):0;
-  const h={id:`h${Date.now()}`,name,emoji:selEmoji,habitType:selHabitType||'check',thresholdH,thresholdM,reminderEnabled,reminderTime,order:habits.length,createdAt:Date.now()};
+  /* Store threshold history so future changes don't break past records */
+  const thresholdHistory=selHabitType==='timed'?[{thresholdH,thresholdM,from:todayKey}]:[];
+  const h={id:`h${Date.now()}`,name,emoji:selEmoji,habitType:selHabitType||'check',thresholdH,thresholdM,thresholdHistory,reminderEnabled,reminderTime,order:habits.length,createdAt:Date.now()};
   closeModal('add-modal');
   await saveHabitToDb(h);
   showToast(selHabitType==='timed'?`⏱ Time habit added — goal: ${thresholdH?thresholdH+'h ':''}${thresholdM}min`:'✅ Habit added ✓');
   if(reminderEnabled&&'Notification' in window&&Notification.permission==='default') Notification.requestPermission().then(p=>{if(p==='granted')scheduleAllReminders();});
+};
+
+/* ── UPDATE THRESHOLD (date-safe) ── */
+window.openEditThresholdModal=function(hid){
+  const h=habits.find(x=>x.id===hid); if(!h) return;
+  /* Populate modal with current threshold */
+  const cur=getTimerThreshold(hid,todayKey);
+  const curH=Math.floor(cur/3600);
+  const curM=Math.floor((cur%3600)/60);
+  document.getElementById('edit-thresh-hid').value=hid;
+  document.getElementById('edit-thresh-h').value=curH;
+  document.getElementById('edit-thresh-m').value=curM;
+  document.getElementById('edit-thresh-name').textContent=h.emoji+' '+h.name;
+  document.getElementById('edit-thresh-note').textContent=
+    'Current goal: '+fmtSecs(cur)+' (set '+((h.thresholdHistory&&h.thresholdHistory.length>0)?h.thresholdHistory[h.thresholdHistory.length-1].from:'originally')+')';
+  document.getElementById('edit-threshold-modal').classList.add('open');
+};
+
+window.saveEditThreshold=async function(){
+  const hid=document.getElementById('edit-thresh-hid').value;
+  const h=habits.find(x=>x.id===hid); if(!h) return;
+  const newH=isNaN(parseInt(document.getElementById('edit-thresh-h').value))?0:parseInt(document.getElementById('edit-thresh-h').value);
+  const newM=isNaN(parseInt(document.getElementById('edit-thresh-m').value))?0:parseInt(document.getElementById('edit-thresh-m').value);
+  if(newH===0&&newM===0){ showToast('Goal time cannot be zero'); return; }
+  /* Append new entry to history starting from TODAY */
+  const history=[...(h.thresholdHistory||[{thresholdH:h.thresholdH||0,thresholdM:h.thresholdM||0,from:h.createdAt?fmtDate(new Date(h.createdAt)):todayKey}])];
+  /* Remove any existing entry for today (replace it) */
+  const filtered=history.filter(e=>e.from!==todayKey);
+  filtered.push({thresholdH:newH,thresholdM:newM,from:todayKey});
+  /* Also update top-level fields for backward compat */
+  const updated={...h,thresholdH:newH,thresholdM:newM,thresholdHistory:filtered};
+  closeModal('edit-threshold-modal');
+  await saveHabitToDb(updated);
+  showToast('⏱ Goal updated from '+todayKey+' onwards — past records unchanged ✓');
 };
 
 window.confirmDelete=async function(hid){
