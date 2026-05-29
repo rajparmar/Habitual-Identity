@@ -56,66 +56,6 @@ const QUOTES = [
   {text:"It does not matter how slowly you go as long as you do not stop.",author:"Confucius"},
   {text:"Push yourself, because no one else is going to do it for you.",author:"Unknown"},
   {text:"Your future is created by what you do today, not tomorrow.",author:"Robert Kiyosaki"},
-  {text:"First forget inspiration. Habit is more dependable. Habit will sustain you whether you’re inspired or not.",author:"Octavia Butler"},
-{text:"Successful people are simply those with successful habits.",author:"Brian Tracy"},
-{text:"We first make our habits, and then our habits make us.",author:"John Dryden"},
-{text:"Good habits formed at youth make all the difference.",author:"Aristotle"},
-{text:"You’ll never change your life until you change something you do daily.",author:"John C. Maxwell"},
-{text:"People do not decide their futures, they decide their habits and their habits decide their futures.",author:"F. M. Alexander"},
-{text:"Excellence is not a skill. It is an attitude.",author:"Ralph Marston"},
-{text:"Success doesn’t come from what you do occasionally, it comes from what you do consistently.",author:"Marie Forleo"},
-{text:"What you do every day matters more than what you do once in a while.",author:"Gretchen Rubin"},
-{text:"Discipline is the bridge between goals and accomplishment.",author:"Jim Rohn"},
-{text:"The difference between who you are and who you want to be is what you do.",author:"Bill Phillips"},
-{text:"If you want to change the world, start off by making your bed.",author:"William H. McRaven"},
-{text:"Small disciplines repeated with consistency every day lead to great achievements.",author:"John C. Maxwell"},
-{text:"The successful person has the habit of doing the things failures don’t like to do.",author:"E. M. Gray"},
-{text:"Action is the foundational key to all success.",author:"Pablo Picasso"},
-{text:"Consistency is what transforms average into excellence.",author:"Robin Sharma"},
-{text:"Your habits will determine your future.",author:"Jack Canfield"},
-{text:"Do something today that your future self will thank you for.",author:"Sean Patrick Flanery"},
-{text:"Winning is a habit. Unfortunately, so is losing.",author:"Vince Lombardi"},
-{text:"It’s not what we do once in a while that shapes our lives. It’s what we do consistently.",author:"Tony Robbins"},
-{text:"The pain of discipline weighs ounces. The pain of regret weighs tons.",author:"Jim Rohn"},
-{text:"Suffer the pain of discipline or suffer the pain of regret.",author:"Jim Rohn"},
-{text:"Hard choices, easy life. Easy choices, hard life.",author:"Jerzy Gregorek"},
-{text:"A man who has conquered himself is greater than one who has conquered a thousand men in battle.",author:"Buddha"},
-{text:"The successful warrior is the average man, with laser-like focus.",author:"Bruce Lee"},
-{text:"It never gets easier. You just get stronger.",author:"Unknown"},
-{text:"Be stronger than your strongest excuse.",author:"Unknown"},
-{text:"The only difference between ordinary and extraordinary is that little extra.",author:"Jimmy Johnson"},
-{text:"If you are not willing to risk the usual, you will have to settle for the ordinary.",author:"Jim Rohn"},
-{text:"Comfort is the enemy of achievement.",author:"Farrah Gray"},
-{text:"You will never always be motivated, so you must learn to be disciplined.",author:"Unknown"},
-{text:"The goal is not to be better than the other man, but your previous self.",author:"Dalai Lama"},
-{text:"Greatness is sifted through the grind. Therefore, don’t despise the hard work now.",author:"Sanjiv Dogra"},
-{text:"No pressure, no diamonds.",author:"Thomas Carlyle"},
-{text:"Dreams don’t work unless you do.",author:"John C. Maxwell"},
-{text:"Discipline equals freedom.",author:"Jocko Willink"},
-{text:"When you feel like quitting, remember why you started.",author:"Unknown"},
-{text:"A river cuts through rock not because of its power, but because of its consistency.",author:"Jim Watkins"},
-{text:"The comeback is always stronger than the setback.",author:"Unknown"},
-{text:"Do not pray for an easy life. Pray for the strength to endure a difficult one.",author:"Bruce Lee"},
-{text:"I hated every minute of training, but I said, ‘Don’t quit. Suffer now and live the rest of your life as a champion.’",author:"Muhammad Ali"},
-{text:"It’s hard to beat a person who never gives up.",author:"Babe Ruth"},
-{text:"The difference between successful people and really successful people is that really successful people say no to almost everything.",author:"Warren Buffett"},
-{text:"I fear not the man who has practiced 10,000 kicks once, but I fear the man who has practiced one kick 10,000 times.",author:"Bruce Lee"},
-{text:"Champions keep playing until they get it right.",author:"Billie Jean King"},
-{text:"Success is stumbling from failure to failure with no loss of enthusiasm.",author:"Winston Churchill"},
-{text:"I never dreamed about success. I worked for it.",author:"Estée Lauder"},
-{text:"The more difficult the victory, the greater the happiness in winning.",author:"Pele"},
-{text:"There is no substitute for hard work.",author:"Thomas Edison"},
-{text:"I’ve failed over and over and over again in my life. And that is why I succeed.",author:"Michael Jordan"},
-{text:"If people are doubting how far you can go, go so far that you can’t hear them anymore.",author:"Michele Ruiz"},
-{text:"Obsessed is just a word the lazy use to describe the dedicated.",author:"Russell Warren"},
-{text:"You have power over your mind — not outside events. Realize this, and you will find strength.",author:"Marcus Aurelius"},
-{text:"If you can’t tolerate critics, don’t do anything new or interesting.",author:"Jeff Bezos"},
-{text:"Great works are performed not by strength but by perseverance.",author:"Samuel Johnson"},
-{text:"The successful man will profit from his mistakes and try again in a different way.",author:"Dale Carnegie"},
-{text:"I am not a product of my circumstances. I am a product of my decisions.",author:"Stephen Covey"},
-{text:"Strength does not come from physical capacity. It comes from an indomitable will.",author:"Mahatma Gandhi"},
-{text:"The man on the top of the mountain didn’t fall there.",author:"Vince Lombardi"},
-{text:"Work hard in silence. Let success make the noise.",author:"Frank Ocean"},
 ];
 const GRADES = [
   {g:'SSS',min:100,cls:'g-sss',bgcls:'gbg-sss',label:'Legendary',color:'#FF1744'},
@@ -422,10 +362,44 @@ function toggle(hid,dk){ toggleLog(hid,dk,true,null); }
 function isChecked(hid,dk){ return !!(logs[dk]&&logs[dk][hid]); }
 function getStreak(hid){ let s=0,d=new Date(now); for(let i=0;i<400;i++){ if(!isChecked(hid,fmtDate(d)))break; s++;d.setDate(d.getDate()-1); } return s; }
 function getCompletions(hid){ return Object.values(logs).filter(d=>d[hid]).length; }
-function getTodayScore(){ if(!habits.length)return{done:0,total:0,pct:0}; const done=habits.filter(h=>isChecked(h.id,todayKey)).length; return{done,total:habits.length,pct:Math.round(done/habits.length*100)}; }
-function getScoreMsg(p){ return p===100?'🎉 Perfect day!':p>=85?'💪 Almost there!':p>=60?'✨ Great progress!':p>0?'🌱 Keep going!':'👋 Let\'s get started!'; }
+/* ── WEIGHTAGE ENGINE ── */
+function getDayUnits(dk){
+  /* Returns {units (float), maxUnits (int)} for a given date.
+     timed  : elapsed_secs / threshold_secs  → fractional, can exceed 1.0
+     tickable: 1 if done, 0 if not */
+  if(!habits.length) return {units:0,maxUnits:0};
+  let units=0, maxUnits=habits.length;
+  habits.forEach(h=>{
+    if(h.habitType==='timed'){
+      const thr=getTimerThreshold(h.id,dk);
+      const elapsed=(logs[dk]&&logs[dk][h.id+'_time'])||0;
+      units+= thr>0 ? elapsed/thr : (isChecked(h.id,dk)?1:0);
+    } else {
+      units+= isChecked(h.id,dk)?1:0;
+    }
+  });
+  return {units, maxUnits};
+}
+
+function getTodayScore(){
+  if(!habits.length) return {done:0,total:0,pct:0,units:0,maxUnits:0};
+  const {units,maxUnits}=getDayUnits(todayKey);
+  /* For header ring: pct = units/maxUnits*100 (can exceed 100) */
+  const pct=maxUnits>0?units/maxUnits*100:0;
+  /* done = integer completed habits (for "X / Y" display) */
+  const done=habits.filter(h=>isChecked(h.id,todayKey)).length;
+  return {done,total:habits.length,pct,units,maxUnits};
+}
+function getScoreMsg(p){
+  return p>=100?'🎉 Perfect day!':p>=85?'💪 Almost there!':p>=60?'✨ Great progress!':p>0?'🌱 Keep going!':'👋 Let\'s get started!';
+}
 function getWeekDays(offset=0){ const days=[]; const mon=new Date(now); mon.setDate(mon.getDate()-mon.getDay()+1+offset*7); for(let i=0;i<7;i++){ const d=new Date(mon);d.setDate(mon.getDate()+i);days.push(fmtDate(d)); } return days; }
-function getWeekScore(offset=0){ const days=getWeekDays(offset); if(!habits.length)return 0; let t2=0,d2=0; days.forEach(dk=>{ habits.forEach(h=>{ t2++;if(isChecked(h.id,dk))d2++; }); }); return t2?Math.round(d2/t2*100):0; }
+function getWeekScore(offset=0){
+  const days=getWeekDays(offset); if(!habits.length)return 0;
+  let totalUnits=0,totalMax=0;
+  days.forEach(dk=>{ const {units,maxUnits}=getDayUnits(dk); totalUnits+=units; totalMax+=maxUnits; });
+  return totalMax>0?Math.round(totalUnits/totalMax*100):0;
+}
 function getHabitWeekScore(hid,offset=0){ const days=getWeekDays(offset); return Math.round(days.filter(dk=>isChecked(hid,dk)).length/7*100); }
 
 /* ════════════════════════════════════════
@@ -436,6 +410,12 @@ function fmtSecs(s){
   const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
   if(h>0) return h+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
   return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function fmtUnits(units,maxUnits){
+  /* Format like "2.50 / 4 units (62.5%)" */
+  const u=Math.round(units*100)/100;
+  const pct=maxUnits>0?Math.round(units/maxUnits*100):0;
+  return u+' / '+maxUnits+' units ('+pct+'%)';
 }
 function getTimerThreshold(hid, dateKey){
   const h=habits.find(x=>x.id===hid); if(!h) return 0;
@@ -716,7 +696,8 @@ function playBreakEnd(){
 function checkAllDone(){
   if(!habits.length)return;
   const sc=getTodayScore();
-  if(sc.pct===100&&!prevAllDone){ launchConfetti(); showToast('🎉 All habits done! Perfect day!'); }
+  /* Trigger confetti when all habits are checked (boolean done) */
+  if(sc.done===sc.total&&sc.total>0&&!prevAllDone){ launchConfetti(); showToast('🎉 All habits done! Perfect day!'); }
   prevAllDone=sc.pct===100;
 }
 
@@ -728,10 +709,18 @@ function renderHeader(){
   const mons=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const el=document.getElementById('hdr-date'); if(el)el.textContent=`${days[now.getDay()]}, ${mons[now.getMonth()]} ${now.getDate()} ${now.getFullYear()}`;
   const sc=getTodayScore();
-  document.getElementById('score-fraction').textContent=`${sc.done} / ${sc.total}`;
-  document.getElementById('score-pct-txt').textContent=sc.pct+'%';
+  /* Clamp ring fill to 100% but show glow when over */
+  const ringFill=Math.min(sc.pct,100);
+  const unitsRounded=Math.round(sc.units*100)/100;
+  document.getElementById('score-fraction').textContent=
+    unitsRounded+' / '+sc.maxUnits+' units';
+  document.getElementById('score-pct-txt').textContent=
+    Math.round(sc.pct)+'%';
   document.getElementById('score-msg').textContent=getScoreMsg(sc.pct);
-  document.getElementById('score-arc').style.strokeDashoffset=175.9*(1-sc.pct/100);
+  document.getElementById('score-arc').style.strokeDashoffset=175.9*(1-ringFill/100);
+  /* Extra glow on ring when over 100% */
+  const arc=document.getElementById('score-arc');
+  if(arc) arc.style.filter=sc.pct>100?'drop-shadow(0 0 6px currentColor)':'none';
 }
 
 /* ── TODAY ── */
@@ -986,13 +975,26 @@ function renderStats(){
   let tc=0; Object.values(logs).forEach(d=>Object.entries(d).forEach(([k,v])=>{if(!k.endsWith('_time')&&v===true)tc++;}));
   const bs=habits.length?Math.max(0,...habits.map(h=>getStreak(h.id))):0;
   const ad=Object.keys(logs).filter(k=>Object.values(logs[k]).some(v=>v)).length;
+  /* Weighted total units across all time */
+  let totalUnitsAllTime=0;
+  Object.keys(logs).forEach(dk=>{ const {units}=getDayUnits(dk); totalUnitsAllTime+=units; });
+  const totalUnitsRounded=Math.round(totalUnitsAllTime*10)/10;
+  const todayU=getDayUnits(todayKey);
+  const todayUnitsRounded=Math.round(todayU.units*100)/100;
   document.getElementById('stat-grid').innerHTML=`
     <div class="stat-card"><div class="stat-val">${habits.length}</div><div class="stat-lbl">Habits tracked</div></div>
-    <div class="stat-card"><div class="stat-val">${tc}</div><div class="stat-lbl">Total completions</div></div>
+    <div class="stat-card"><div class="stat-val">${totalUnitsRounded}</div><div class="stat-lbl">Total units earned</div></div>
     <div class="stat-card"><div class="stat-val">${bs}</div><div class="stat-lbl">Best streak</div></div>
-    <div class="stat-card"><div class="stat-val">${ad}</div><div class="stat-lbl">Active days</div></div>`;
+    <div class="stat-card"><div class="stat-val">${todayUnitsRounded}<span style="font-size:14px;opacity:0.6"> / ${todayU.maxUnits}</span></div><div class="stat-lbl">Today's units</div></div>`;
   drawTrendChart();
-  let hm=''; for(let i=29;i>=0;i--){ const d=new Date(now);d.setDate(d.getDate()-i);const dk=fmtDate(d),dl=logs[dk]||{},done=habits.filter(h=>dl[h.id]).length,tot=habits.length;const lv=!tot||!done?'':done/tot<0.34?'l1':done/tot<0.67?'l2':done/tot<1?'l3':'l4';hm+=`<div class="hm-cell ${lv}"></div>`; }
+  let hm=''; for(let i=29;i>=0;i--){
+    const d=new Date(now);d.setDate(d.getDate()-i);
+    const dk=fmtDate(d);
+    const {units,maxUnits}=getDayUnits(dk);
+    const ratio=maxUnits>0?units/maxUnits:0;
+    const lv=!maxUnits||units===0?'':ratio<0.34?'l1':ratio<0.67?'l2':ratio<1?'l3':'l4';
+    hm+=`<div class="hm-cell ${lv}" title="${fmtUnits(units,maxUnits)}"></div>`;
+  }
   document.getElementById('heatmap').innerHTML=hm;
   const rows=document.getElementById('habit-stat-rows');
   if(!habits.length){rows.innerHTML=`<div style="color:var(--text-hint);font-size:14px;text-align:center;padding:20px 0">No habits yet</div>`;return;}
@@ -1007,24 +1009,90 @@ function renderStats(){
 function drawTrendChart(){
   const canvas=document.getElementById('trend-canvas'); if(!canvas)return;
   const rect=canvas.getBoundingClientRect(); const W=Math.floor(rect.width)||canvas.parentElement?.offsetWidth||300; if(W===0)return;
-  const ctx=canvas.getContext('2d'),dpr=window.devicePixelRatio||1,H=120;
+  const ctx=canvas.getContext('2d'),dpr=window.devicePixelRatio||1,H=140;
   canvas.width=W*dpr;canvas.height=H*dpr;ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
   const dark=document.documentElement.getAttribute('data-theme')==='dark';
-  const gc=dark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)', lc=dark?'#333':'#B0B0C8';
+  const gc=dark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)', lc=dark?'#555':'#B0B0C8';
   const accCol=dark?'#E53935':'#7F77DD', fillCol=dark?'rgba(229,57,53,0.1)':'rgba(127,119,221,0.1)';
-  const pts=30,data=[];
-  for(let i=pts-1;i>=0;i--){ const d=new Date(now);d.setDate(d.getDate()-i);const dk=fmtDate(d),dl=logs[dk]||{},done=habits.filter(h=>dl[h.id]).length;data.push(habits.length?Math.round(done/habits.length*100):0); }
-  const pad={t:8,r:8,b:26,l:28},cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
-  [0,50,100].forEach(v=>{const y=pad.t+cH*(1-v/100);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);ctx.strokeStyle=gc;ctx.lineWidth=1;ctx.stroke();ctx.fillStyle=lc;ctx.font=`9px -apple-system,sans-serif`;ctx.textAlign='right';ctx.fillText(v+'%',pad.l-3,y+3);});
+  const overCol=dark?'rgba(255,193,7,0.7)':'rgba(255,152,0,0.8)'; /* colour for >100% segments */
+  const pts=30;
+
+  /* Build unit data for 30 days */
+  const data=[];
+  for(let i=pts-1;i>=0;i--){
+    const d=new Date(now);d.setDate(d.getDate()-i);
+    const dk=fmtDate(d);
+    const {units,maxUnits}=getDayUnits(dk);
+    data.push({units,maxUnits,dk});
+  }
+
+  const maxUnits=habits.length||1;
+  /* Y-axis ceiling: at least maxUnits, expand if any day exceeded it */
+  const maxVal=Math.max(maxUnits,...data.map(d=>d.units),maxUnits*1.1);
+  const pad={t:12,r:10,b:26,l:34},cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
+
+  /* Grid lines */
+  const gridVals=[0];
+  for(let v=maxUnits>=2?Math.ceil(maxUnits/2):1;v<=maxVal;v+=maxUnits>=2?Math.ceil(maxUnits/2):1) gridVals.push(v);
+  if(!gridVals.includes(maxUnits)) gridVals.push(maxUnits);
+  gridVals.forEach(v=>{
+    const y=pad.t+cH*(1-v/maxVal);
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cW,y);
+    const isPerfect=v===maxUnits;
+    ctx.strokeStyle=isPerfect?(dark?'rgba(229,57,53,0.35)':'rgba(127,119,221,0.35)'):gc;
+    ctx.lineWidth=isPerfect?1.5:1;
+    ctx.setLineDash(isPerfect?[4,3]:[]);
+    ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=isPerfect?(dark?'#E53935':'#7F77DD'):lc;
+    ctx.font=`9px -apple-system,sans-serif`;ctx.textAlign='right';
+    ctx.fillText(v===maxUnits?maxUnits+'u':v,pad.l-3,y+3);
+  });
+
+  /* Date labels */
   ctx.fillStyle=lc;ctx.font=`9px -apple-system,sans-serif`;ctx.textAlign='center';
-  [0,7,14,21,29].forEach(i=>{const x=pad.l+(i/(pts-1))*cW,d=new Date(now);d.setDate(d.getDate()-(pts-1-i));ctx.fillText(`${d.getMonth()+1}/${d.getDate()}`,x,H-4);});
-  if(data.every(v=>v===0)){ctx.fillStyle=lc;ctx.font='12px -apple-system,sans-serif';ctx.textAlign='center';ctx.fillText('Complete habits to see trend',W/2,H/2);return;}
-  ctx.beginPath();data.forEach((v,i)=>{const x=pad.l+(i/(pts-1))*cW,y=pad.t+cH*(1-v/100);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
-  ctx.lineTo(pad.l+cW,pad.t+cH);ctx.lineTo(pad.l,pad.t+cH);ctx.closePath();ctx.fillStyle=fillCol;ctx.fill();
-  ctx.beginPath();data.forEach((v,i)=>{const x=pad.l+(i/(pts-1))*cW,y=pad.t+cH*(1-v/100);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
-  ctx.strokeStyle=accCol;ctx.lineWidth=2;ctx.lineJoin='round';ctx.stroke();
-  const tx=pad.l+cW,ty=pad.t+cH*(1-data[pts-1]/100);
-  ctx.beginPath();ctx.arc(tx,ty,4,0,Math.PI*2);ctx.fillStyle=accCol;ctx.fill();
+  [0,7,14,21,29].forEach(i=>{
+    const x=pad.l+(i/(pts-1))*cW,d=new Date(now);
+    d.setDate(d.getDate()-(pts-1-i));
+    ctx.fillText(`${d.getMonth()+1}/${d.getDate()}`,x,H-4);
+  });
+
+  if(data.every(d=>d.units===0)){
+    ctx.fillStyle=lc;ctx.font='12px -apple-system,sans-serif';ctx.textAlign='center';
+    ctx.fillText('Complete habits to see trend',W/2,H/2);return;
+  }
+
+  /* Fill area under curve (normal portion up to maxUnits) */
+  ctx.beginPath();
+  data.forEach(({units},i)=>{
+    const x=pad.l+(i/(pts-1))*cW;
+    const yVal=Math.min(units,maxVal);
+    const y=pad.t+cH*(1-yVal/maxVal);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.lineTo(pad.l+cW,pad.t+cH);ctx.lineTo(pad.l,pad.t+cH);
+  ctx.closePath();ctx.fillStyle=fillCol;ctx.fill();
+
+  /* Main line — colour-coded: normal=acc, overtime segment=orange */
+  for(let i=1;i<data.length;i++){
+    const x0=pad.l+((i-1)/(pts-1))*cW, x1=pad.l+(i/(pts-1))*cW;
+    const u0=Math.min(data[i-1].units,maxVal), u1=Math.min(data[i].units,maxVal);
+    const y0=pad.t+cH*(1-u0/maxVal), y1=pad.t+cH*(1-u1/maxVal);
+    const isOver=(data[i-1].units>maxUnits||data[i].units>maxUnits);
+    ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);
+    ctx.strokeStyle=isOver?overCol:accCol;ctx.lineWidth=2;ctx.lineJoin='round';ctx.stroke();
+  }
+
+  /* Dot at last point */
+  const lastU=Math.min(data[pts-1].units,maxVal);
+  const tx=pad.l+cW, ty=pad.t+cH*(1-lastU/maxVal);
+  ctx.beginPath();ctx.arc(tx,ty,4,0,Math.PI*2);
+  ctx.fillStyle=data[pts-1].units>maxUnits?overCol:accCol;ctx.fill();
+
+  /* "Perfect" label on the dashed line */
+  const perfY=pad.t+cH*(1-maxUnits/maxVal);
+  ctx.fillStyle=dark?'rgba(229,57,53,0.6)':'rgba(127,119,221,0.6)';
+  ctx.font=`8px -apple-system,sans-serif`;ctx.textAlign='left';
+  ctx.fillText('perfect',pad.l+2,perfY-3);
 }
 
 /* ── QUOTES ── */
