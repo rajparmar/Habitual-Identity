@@ -262,7 +262,7 @@ window.signInWithGoogle=async function(){
   }
 };
 window.doSignOut=async function(){
-  if(!confirm('Sign out of HabitTick?')) return;
+  if(!confirm('Sign out of Habid?')) return;
   if(unsubHabits)unsubHabits(); if(unsubLogs)unsubLogs();
   habits=[]; logs={}; tasks={};
   if(unsubTasks)unsubTasks();
@@ -1107,7 +1107,7 @@ function scheduleAllReminders(){
     if(!h.reminderEnabled||!h.reminderTime)return;
     const[hh,mm]=h.reminderTime.split(':').map(Number),t=new Date();
     t.setHours(hh,mm,0,0); let ms=t-Date.now(); if(ms<0)ms+=86400000;
-    notifTimers.push(setTimeout(()=>{ if(!isChecked(h.id,fmtDate(new Date()))) new Notification('HabitTick 🎯',{body:`Time to: ${h.emoji} ${h.name}`,icon:'./icon-192.png',tag:h.id}); scheduleAllReminders(); },ms));
+    notifTimers.push(setTimeout(()=>{ if(!isChecked(h.id,fmtDate(new Date()))) new Notification('Habid 🎯',{body:`Time to: ${h.emoji} ${h.name}`,icon:'./icon-192.png',tag:h.id}); scheduleAllReminders(); },ms));
   });
   const hasR=habits.some(h=>h.reminderEnabled);
   if(hasR&&Notification.permission==='default') document.getElementById('notif-banner').classList.add('show');

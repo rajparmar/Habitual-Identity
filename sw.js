@@ -1,5 +1,5 @@
-/* HabitTick Service Worker — cache-busting version */
-const CACHE = 'habittick-v' + Date.now();
+/* Habid Service Worker — cache-busting version */
+const CACHE = 'habid-v' + Date.now();
 const ASSETS = ['./', './index.html', './style.css', './app.js', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
