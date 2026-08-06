@@ -171,16 +171,18 @@ body{
 
 /* ════ QUOTE ════ */
 .quote-card{
-  margin:clamp(8px,2vw,12px) clamp(12px,3.5vw,16px) 0;
-  background:var(--acc-light);border:1px solid var(--acc-mid);
-  border-radius:14px;padding:clamp(9px,2.5vw,12px) clamp(12px,3vw,14px);
-  display:flex;align-items:flex-start;gap:8px
+  margin:clamp(10px,2.5vw,14px) clamp(12px,3.5vw,16px) 0;
+  background:linear-gradient(135deg,var(--acc-light),var(--acc-mid));
+  border:1px solid var(--acc-mid);
+  border-radius:16px;padding:clamp(14px,4vw,20px) clamp(16px,4.5vw,20px);
+  display:flex;align-items:flex-start;gap:10px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.06)
 }
-.quote-mark{font-size:20px;color:var(--acc);flex-shrink:0;line-height:1}
+.quote-mark{font-size:clamp(30px,8vw,40px);color:var(--acc);flex-shrink:0;line-height:0.7;font-weight:800;font-family:Georgia,serif}
 .quote-body{flex:1;min-width:0}
-.quote-text{font-size:clamp(11px,3vw,13px);color:var(--text);line-height:1.5;font-style:italic}
-.quote-author{font-size:clamp(10px,2.5vw,11px);color:var(--text-sec);margin-top:3px;font-weight:600}
-.quote-refresh{background:none;border:none;color:var(--acc);cursor:pointer;font-size:15px;padding:0;flex-shrink:0}
+.quote-text{font-size:clamp(15px,4.5vw,19px);color:var(--text);line-height:1.45;font-style:italic;font-weight:700;letter-spacing:-0.2px}
+.quote-author{font-size:clamp(12px,3.2vw,14px);color:var(--acc2);margin-top:6px;font-weight:800;letter-spacing:0.2px}
+.quote-refresh{background:none;border:none;color:var(--acc);cursor:pointer;font-size:19px;padding:0;flex-shrink:0}
 
 /* ════ TABS ════ */
 .tab-bar{display:flex;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}

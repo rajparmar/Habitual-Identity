@@ -115,7 +115,7 @@ function streakLabel(s){
 
 /* ── STATE ── */
 let currentUser=null, habits=[], logs={};
-let selEmoji=EMOJIS[0], selHabitType='check', calYear, calMonth, selCalDate, gradeWeekOffset=0, quoteIdx=0;
+let selEmoji=EMOJIS[0], selHabitType='check', calYear, calMonth, selCalDate, gradeWeekOffset=0, quoteIdx=Math.floor(Math.random()*QUOTES.length);
 let notifTimers=[], soundOn=true, prevAllDone=false;
 let timers={}, activeTimerModal=null, timerTick=null;
 let tasks={};        /* tasks[dateKey] = [{id,name,done},...] — one-day tasks, never affect stats */
