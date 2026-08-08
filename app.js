@@ -116,6 +116,7 @@ const QUOTES = [
 {text:"Strength does not come from physical capacity. It comes from an indomitable will.",author:"Mahatma Gandhi"},
 {text:"The man on the top of the mountain didn’t fall there.",author:"Vince Lombardi"},
 {text:"Work hard in silence. Let success make the noise.",author:"Frank Ocean"},
+
 ];
 const GRADES = [
   {g:'SSS',min:100,cls:'g-sss',bgcls:'gbg-sss',label:'Legendary',color:'#FF1744'},
