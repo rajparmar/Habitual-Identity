@@ -1,6 +1,6 @@
 {
-  "name": "HABID - Daily Habit Tracker",
-  "short_name": "HABID",
+  "name": "habID - Daily Habit Tracker",
+  "short_name": "habID",
   "description": "Track your daily habits, build streaks, and reach your goals.",
   "start_url": "./index.html",
   "display": "standalone",
